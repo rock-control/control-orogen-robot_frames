@@ -125,6 +125,10 @@ void Task::updateHook()
             //This should never be triggered
             assert(it != out_ports.end());
 
+            // Apply prefix
+            transform.sourceFrame.insert(0, _prefix.get());
+            transform.targetFrame.insert(0, _prefix.get());
+
             //Write single output
             it->second->write(transform);
 
