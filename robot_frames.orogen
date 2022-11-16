@@ -10,6 +10,7 @@ task_context "Task" do
     needs_configuration
 
     property "urdf_file", "/std/string"
+    property "prefix", "/std/string"
     property "output_static_transforms", "bool", true
     property "init_invalid", "bool", false
 
