@@ -10,6 +10,7 @@ task_context "Task" do
     needs_configuration
 
     property "urdf_file", "/std/string"
+    # Frames in URDF will be prefixed with the given string
     property "prefix", "/std/string"
     property "output_static_transforms", "bool", true
     property "init_invalid", "bool", false
@@ -31,6 +32,8 @@ task_context "ChainPublisher" do
     #By entering '__base__' as root or tip link, one could refer to the actual base-link of the robot model
     property "chains", "std/vector<robot_frames/Chain>"
     property "urdf_file", "std/string"
+    # Frames in URDF will be prefixed with the given string
+    property "prefix", "/std/string"
     
     input_port "input", "/base/samples/Joints"
     dynamic_output_port /\w/, "base/samples/RigidBodyState"

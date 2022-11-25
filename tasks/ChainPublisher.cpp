@@ -1,8 +1,11 @@
 /* Generated from orogen/lib/orogen/templates/tasks/Task.cpp */
 
 #include "ChainPublisher.hpp"
+#include <urdf_model/types.h>
+#include <urdf_parser/urdf_parser.h>
 
 using namespace robot_frames;
+
 
 ChainPublisher::ChainPublisher(std::string const& name)
     : ChainPublisherBase(name)
@@ -73,6 +76,43 @@ bool ChainPublisher::unpack_joints(const base::samples::Joints& joint_state,
     return ok;
 }
 
+
+bool load_urdf(const std::string& path, const std::string& prefix, KDL::Tree& tree)
+{
+    // Read file
+    std::ifstream file(path.c_str());
+    std::string str((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    urdf::ModelInterfaceSharedPtr robot_model = urdf::parseURDF(str);
+    if(!robot_model){
+        return false;
+    }
+
+    // Apply prefix
+    std::map<std::string, urdf::LinkSharedPtr> new_links;
+    for(std::pair<std::string, urdf::LinkSharedPtr> el :  robot_model->links_)
+    {
+        std::string new_name = prefix + el.first;
+        el.second->name = new_name;
+        new_links[new_name] = el.second;
+    }
+    robot_model->links_ = new_links;
+
+    for(std::pair<std::string, urdf::JointSharedPtr> el :  robot_model->joints_)
+    {
+        std::string new_name = prefix + el.first;
+        el.second->child_link_name = prefix + el.second->child_link_name;
+        el.second->parent_link_name = prefix + el.second->parent_link_name;
+    }
+
+    // every link has children links and joints, but no parents, so we create a
+    // local convenience data structure for keeping child->parent relations
+    std::map<std::string, std::string> parent_link_tree;
+    parent_link_tree.clear();
+
+    // Load KDL Tree
+    return kdl_parser::treeFromUrdfModel(*robot_model, tree);
+}
+
 /// The following lines are template definitions for the various state machine
 // hooks defined by Orocos::RTT. See ChainPublisher.hpp for more detailed
 // documentation about them.
@@ -91,7 +131,8 @@ bool ChainPublisher::configureHook()
     std::string urdf_file_path = _urdf_file.get();
 
     bool st;
-    st = kdl_parser::treeFromFile(urdf_file_path, tree_);
+    std::string prefix = _prefix.get();
+    st = load_urdf(urdf_file_path, prefix, tree_);
     if(!st){
         LOG_ERROR_S << "Error parsing urdf file: " << urdf_file_path << std::endl;
         return false;
@@ -114,6 +155,8 @@ bool ChainPublisher::configureHook()
         }
 
         std::string name = chain_definitions[i].name;
+
+        // Unapply prefix
 
         st = tree_.getChain(root, tip, chains_[i]);
         if(!st){
