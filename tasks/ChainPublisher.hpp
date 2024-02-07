@@ -9,7 +9,7 @@
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/jntarray.hpp>
 #include <base/samples/RigidBodyState.hpp>
-#include <base/Logging.hpp>
+#include <base-logging/Logging.hpp>
 
 #include <robot_frames/RobotFrames.hpp>
 
@@ -20,12 +20,16 @@ class ChainPublisher : public ChainPublisherBase
 {
     friend class ChainPublisherBase;
 protected:
+     std::vector<robot_frames::Chain> chain_;
+     std::string urdf_file_;
      base::samples::Joints joint_state;
+     std::vector<base::samples::RigidBodyState> bt_frames_;
      std::vector<RTT::OutputPort<base::samples::RigidBodyState>*> out_ports_;
+
+     ChainTransformationCalculator* chain_transformer;
 
 public:
     ChainPublisher(std::string const& name = "robot_frames::ChainPublisher");
-
     ChainPublisher(std::string const& name, RTT::ExecutionEngine* engine);
 
     ~ChainPublisher();
