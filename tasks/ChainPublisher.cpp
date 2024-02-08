@@ -27,7 +27,9 @@ bool ChainPublisher::configureHook()
 {
     if (! ChainPublisherBase::configureHook())
         return false;
-
+    // clear the output_ports_ vector before configuration
+    output_ports_.clear();
+    
     std::vector<robot_frames::Chain> chain_definitions = _chains.get();
     std::string urdf_file_path = _urdf_file.get();
 
@@ -55,6 +57,8 @@ void ChainPublisher::updateHook()
 {
     ChainPublisherBase::updateHook();
 
+    //clear bt_frames before each update
+    bt_frames_.clear();
     while (_input.read(joint_state, false) == RTT::NewData){
         chain_transformer->update_transforms(joint_state, bt_frames_);
         for(int i=0; i< output_ports_.size(); i++){
@@ -73,5 +77,10 @@ void ChainPublisher::stopHook()
 void ChainPublisher::cleanupHook()
 {
     ChainPublisherBase::cleanupHook();
+
+    // Remove all dynamically created ports
+    for(const std::string& port_name :  chain_transformer->get_chain_names())
+        ports()->removePort(port_name);
+        
     delete chain_transformer;
 }
