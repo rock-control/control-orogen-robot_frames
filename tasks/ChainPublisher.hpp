@@ -20,11 +20,9 @@ class ChainPublisher : public ChainPublisherBase
 {
     friend class ChainPublisherBase;
 protected:
-     std::vector<robot_frames::Chain> chain_;
-     std::string urdf_file_;
      base::samples::Joints joint_state;
      std::vector<base::samples::RigidBodyState> bt_frames_;
-     std::vector<RTT::OutputPort<base::samples::RigidBodyState>*> out_ports_;
+     std::vector<RTT::OutputPort<base::samples::RigidBodyState>*> output_ports_;
 
      ChainTransformationCalculator* chain_transformer;
 
