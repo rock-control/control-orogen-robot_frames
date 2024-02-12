@@ -1,7 +1,7 @@
 name "robot_frames"
 using_library "robot_frames"
 
-import_types_from "robot_framesTypes.hpp"
+import_types_from "robot_frames/robot_framesTypes.hpp"
 
 import_types_from "base"
 #import_types_from "transformer"
